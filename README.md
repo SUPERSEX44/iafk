@@ -57,6 +57,7 @@ Credits:
 
     Original Credits to Miihai
     Improved by realdiegopoptart for compatibility with YSI foreach.
+    SUPERSEX44 Adapt it for the YSI/hooks libraries
 
 License:
 

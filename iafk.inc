@@ -5,45 +5,29 @@
 
   CHANGES FOR OPEN.RP:
   - made it work for YSI foreach
+  - now is compatible with the new YSI hooks
 */
- 
-new bool:PlayerAFK[MAX_PLAYERS]; // Sets player variable [0-NOT-AFK | 1-AFK]
-new AFKDetect[MAX_PLAYERS]; // Sets current date/time to player from OnPlayerUpdate(OPU)
-new bool: FunctionCall[2][MAX_PLAYERS]; // Helps to not repeat OnPlayerPause or/and OnPlayerUnpause
-new playerAName[MAX_PLAYER_NAME]; //Player name
-new AFKTime[MAX_PLAYERS];
- 
-#if defined _AFKDETECT_INC
-        #endinput
-#endif
-#define _AFKDETECT_INC
- 
+#include <foreach>
+#include <YSI_Coding\y_hooks>
+static bool:PlayerAFK[MAX_PLAYERS]; // Sets player variable [0-NOT-AFK | 1-AFK]
+static AFKDetect[MAX_PLAYERS]; // Sets current date/time to player from OnPlayerUpdate(OPU)
+static bool: FunctionCall[2][MAX_PLAYERS]; // Helps to not repeat OnPlayerPause or/and OnPlayerUnpause
+static playerAName[MAX_PLAYER_NAME]; //Player name
+static AFKTime[MAX_PLAYERS];
+
+//forward
 forward OnPlayerPause(playerid);
 forward OnPlayerUnpause(playerid);
 forward AFKChecker();
 forward IsPlayerPaused(playerid);
 forward TimeSincePaused(playerid);
  
-public OnPlayerUpdate(playerid)
+hook OnPlayerUpdate(playerid)
 {
         AFKDetect[playerid] = gettime();
-    #if defined VFUNC_OnPlayerUpdate
-        return VFUNC_OnPlayerUpdate(playerid);
-    #else
         return 1;
-    #endif
 }
-#if defined VFUNC_OnPlayerUpdate
-    forward VFUNC_OnPlayerUpdate(playerid);
-#endif
-#if defined _ALS_OnPlayerUpdate
-    #undef OnPlayerUpdate
-#else
-    #define _ALS_OnPlayerUpdate
-#endif
-#define OnPlayerUpdate VFUNC_OnPlayerUpdate
- 
-public OnPlayerDisconnect(playerid, reason)
+hook OnPlayerDisconnect(playerid, reason)
 {
         if(PlayerAFK[playerid] == true && FunctionCall[1][playerid] == false)
         {
@@ -55,40 +39,15 @@ public OnPlayerDisconnect(playerid, reason)
                 AFKTime[playerid] = 0;
                 CallLocalFunction("OnPlayerUnpause", "i", playerid);
         }
-    #if defined VFUNC_OnPlayerDisconnect
-        return VFUNC_OnPlayerDisconnect(playerid, reason);
-    #else
         return 1;
-    #endif
 }
-#if defined VFUNC_OnPlayerDisconnect
-    forward VFUNC_OnPlayerDisconnect(playerid, reason);
-#endif
-#if defined _ALS_OnPlayerDisconnect
-    #undef OnPlayerDisconnect
-#else
-    #define _ALS_OnPlayerDisconnect
-#endif
-#define OnPlayerDisconnect VFUNC_OnPlayerDisconnect
  
-public OnGameModeInit()
+hook OnGameModeInit()
 {
         SetTimer("AFKChecker",1000, true);
-    #if defined VFUNC_OnGameModeInit
-        return VFUNC_OnGameModeInit();
-    #else
         return 1;
-    #endif
 }
-#if defined VFUNC_OnGameModeInit
-    forward VFUNC_OnGameModeInit();
-#endif
-#if defined _ALS_OnGameModeInit
-    #undef OnGameModeInit
-#else
-    #define _ALS_OnGameModeInit
-#endif
-#define OnGameModeInit VFUNC_OnGameModeInit
+
 public AFKChecker()
 {
     foreach(new i : Player)
@@ -130,7 +89,8 @@ public IsPlayerPaused(playerid)
         if(PlayerAFK[playerid] == true) return 1;
                 else return 0;
  
-public TimeSincePaused(playerid) {
+public TimeSincePaused(playerid)
+{
         if(PlayerAFK[playerid] == true) return gettime()-AFKTime[playerid];
         else return AFKTime[playerid];
 }
